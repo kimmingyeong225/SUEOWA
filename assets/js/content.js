@@ -26,6 +26,8 @@
   var replayButton = document.getElementById("replayButton");
   var prevButton = document.getElementById("prevButton");
   var nextButton = document.getElementById("nextButton");
+  var surveyEntryBar = document.getElementById("surveyEntryBar");
+  var surveyEntryButton = document.getElementById("surveyEntryButton");
 
   var category = null;
   var playlist = [];
@@ -103,6 +105,19 @@
   }
 
   // ---------------------------------------------------------------------
+  // 평가하기 진입 버튼: 카테고리의 마지막 클립까지 다 보고 나면 나타난다.
+  // (이전/다시보기/다음 등 재생 위치가 바뀌면 다시 숨긴다)
+  // ---------------------------------------------------------------------
+
+  function showSurveyEntry() {
+    surveyEntryBar.hidden = false;
+  }
+
+  function hideSurveyEntry() {
+    surveyEntryBar.hidden = true;
+  }
+
+  // ---------------------------------------------------------------------
   // 재생/전환
   // ---------------------------------------------------------------------
 
@@ -147,6 +162,8 @@
   function goToClip(index) {
     if (index < 0 || index >= playlist.length) return;
 
+    hideSurveyEntry();
+
     var isPreloadedNext =
       index === current + 1 &&
       standbyEl.currentSrc &&
@@ -179,8 +196,8 @@
         setTimeout(goToMenu, 2500);
         return;
       }
-      console.log("[content] last clip finished — returning to menu");
-      goToMenu();
+      console.log("[content] last clip finished — showing survey entry button");
+      showSurveyEntry();
       return;
     }
     goToClip(current + 1);
@@ -237,6 +254,10 @@
     goToClip(current + 1);
   });
 
+  surveyEntryButton.addEventListener("click", function () {
+    Kiosk.switchScreen("survey", { from: "content" });
+  });
+
   // ---------------------------------------------------------------------
   // 앱이 처음 뜰 때 모든 카테고리의 첫 클립을 백그라운드에서 예열해둔다.
   // (화면 표시를 막지 않는 비동기 fire-and-forget)
@@ -277,6 +298,7 @@
     videoA.classList.add("is-active");
     videoB.classList.remove("is-active");
     hideFallback();
+    hideSurveyEntry();
 
     activeEl.src = urlFor(playlist[0]);
     activeEl.load();

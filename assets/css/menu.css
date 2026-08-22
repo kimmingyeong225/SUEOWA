@@ -64,11 +64,12 @@
 
 .menu-prompt {
   margin: 0;
-  font-size: clamp(18px, 3.1vh, 25px);
+  font-size: clamp(18px, 3.1vh, 40px);
   font-weight: 600;
   color: var(--color-fg);
   text-align: center;
   text-shadow: 0 2px 14px rgba(0, 0, 0, 0.85);
+  margin-bottom: 67px;
 }
 
 /* ---------- 오른쪽: 카테고리 영역 (58%) ---------- */
@@ -229,12 +230,20 @@
   display: none;
 }
 
-/* ---------- 하단 107 버튼 (전체 폭) ---------- */
+/* ---------- 하단 행: 107 버튼(넓게) + 평가하기 버튼(작게) ---------- */
 
-.interpreter-cta {
+.interpreter-cta-row {
   flex: none;
   margin-top: clamp(10px, 2vh, 16px);
   width: 100%;
+  display: flex;
+  align-items: stretch;
+  gap: clamp(8px, 1.5vw, 14px);
+}
+
+.interpreter-cta {
+  flex: 1 1 auto;
+  min-width: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -263,3 +272,53 @@
 }
 
 /* .tap-layer--passive 는 모든 화면에서 공유하므로 style.css로 옮김 */
+
+/* ---------- 우측 상단: 관리자 화면 진입용 숨김 탭 영역 (5회 연속 탭) ---------- */
+
+.admin-tap-zone {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: clamp(64px, 9vw, 96px);
+  height: clamp(64px, 9vh, 96px);
+  z-index: 6;
+  cursor: default;
+}
+
+/* ---------- 우측 하단: 상시 노출되는 작은 평가하기 버튼 (107 버튼 옆) ---------- */
+
+.survey-menu-button {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 72px;
+  min-height: 56px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.07);
+  padding: 8px clamp(12px, 1.8vw, 18px);
+  font-family: inherit;
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.survey-menu-button:active {
+  transform: scale(0.95);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.survey-menu-icon {
+  width: clamp(16px, 2.2vh, 20px);
+  height: clamp(16px, 2.2vh, 20px);
+  flex: none;
+}
+
+.survey-menu-button span {
+  font-size: clamp(11px, 1.5vh, 13px);
+  font-weight: 600;
+  color: var(--color-fg);
+  white-space: nowrap;
+}

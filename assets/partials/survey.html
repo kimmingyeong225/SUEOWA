@@ -1,0 +1,63 @@
+<main id="screen-survey" class="screen stage survey-stage">
+
+  <button type="button" class="survey-close-button" id="surveyCloseButton" aria-label="닫기">
+    <svg class="survey-close-icon" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.4"
+         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M18 6l-12 12" /><path d="M6 6l12 12" />
+    </svg>
+  </button>
+
+  <div class="survey-body" id="surveyBody"></div>
+
+  <div class="survey-footer" id="surveyFooter">
+    <div class="survey-dots" id="surveyDots">
+      <span class="survey-dot"></span>
+      <span class="survey-dot"></span>
+      <span class="survey-dot"></span>
+      <span class="survey-dot"></span>
+      <span class="survey-dot"></span>
+      <span class="survey-dot"></span>
+    </div>
+    <div class="survey-nav">
+      <button type="button" class="survey-nav-button survey-nav-button--prev" id="surveyPrevButton">이전</button>
+      <button type="button" class="survey-nav-button survey-nav-button--primary" id="surveyNextButton">다음</button>
+    </div>
+  </div>
+
+  <div class="survey-complete" id="surveyComplete" hidden>
+    <svg class="survey-complete-icon" viewBox="0 0 24 24" fill="none" stroke="#4ADE9E" stroke-width="1.6"
+         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+      <path d="M9 12l2 2l4 -4" />
+    </svg>
+    <p class="survey-complete-title">감사합니다</p>
+    <p class="survey-complete-sub">소중한 의견이 저장되었습니다</p>
+  </div>
+
+</main>
+
+<!-- 관리자 화면: 메뉴 화면 우측 상단 5회 연속 탭으로 진입, 다른 화면 위에 겹쳐 뜬다 -->
+<div class="admin-overlay" id="adminOverlay" hidden>
+  <div class="admin-panel">
+    <button type="button" class="admin-close-button" id="adminCloseButton" aria-label="닫기">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.4"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M18 6l-12 12" /><path d="M6 6l12 12" />
+      </svg>
+    </button>
+
+    <h2 class="admin-title">설문 응답 현황</h2>
+
+    <div class="admin-stats" id="adminStats"></div>
+
+    <div class="admin-section">
+      <h3 class="admin-section-title">문항별 평균 점수 (1~5)</h3>
+      <div class="admin-averages" id="adminAverages"></div>
+    </div>
+
+    <div class="admin-actions">
+      <button type="button" class="admin-action-button" id="adminExportButton">CSV 내보내기</button>
+      <button type="button" class="admin-action-button admin-action-button--primary" id="adminRetryButton">미전송 재시도</button>
+    </div>
+  </div>
+</div>

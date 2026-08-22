@@ -5,12 +5,13 @@
 (function () {
   "use strict";
 
-  var SCREENS = ["standby", "menu", "content", "relay"];
+  var SCREENS = ["standby", "menu", "content", "relay", "survey"];
   var SCREEN_SCRIPTS = [
     "assets/js/app.js",
     "assets/js/menu.js",
     "assets/js/content.js",
-    "assets/js/relay.js"
+    "assets/js/relay.js",
+    "assets/js/survey.js"
   ];
 
   var app = document.getElementById("app");

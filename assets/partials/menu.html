@@ -10,11 +10,11 @@
     </div>
 
     <div class="menu-video-vignette"></div>
-
+<!-- 
     <div class="status-badge">
       <span class="status-dot"></span>
       <span class="status-label menu-status-label">수어 안내 중</span>
-    </div>
+    </div> -->
 
     <div class="menu-prompt-bar">
       <p class="menu-prompt" id="menuPrompt"></p>
@@ -29,13 +29,26 @@
 
     <div class="category-grid" id="categoryGrid"></div>
 
-    <button type="button" class="interpreter-cta" id="menuInterpreterCta">
-      <svg class="interpreter-cta-icon" viewBox="0 0 64 64" fill="none" aria-hidden="true">
-        <rect x="7" y="17" width="34" height="30" rx="6" stroke="#ffffff" stroke-width="4"/>
-        <path d="M41 27 L56 19 V45 L41 37 Z" fill="#ffffff"/>
-      </svg>
-      <span class="interpreter-cta-text">다른 질문이 있어요 · 수어통역 연결 107</span>
-    </button>
+    <div class="interpreter-cta-row">
+      <button type="button" class="interpreter-cta" id="menuInterpreterCta">
+        <svg class="interpreter-cta-icon" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+          <rect x="7" y="17" width="34" height="30" rx="6" stroke="#ffffff" stroke-width="4"/>
+          <path d="M41 27 L56 19 V45 L41 37 Z" fill="#ffffff"/>
+        </svg>
+        <span class="interpreter-cta-text">다른 질문이 있어요 · 수어통역 연결 107</span>
+      </button>
+
+      <button type="button" class="survey-menu-button" id="surveyMenuButton">
+        <svg class="survey-menu-icon" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873l-6.158 -3.245" />
+        </svg>
+        <span>평가</span>
+      </button>
+    </div>
   </section>
+
+  <!-- 관리자 화면 진입용 숨김 탭 영역: 5회 연속 탭하면 열림 (아이콘/표시 없음) -->
+  <div class="admin-tap-zone" id="adminTapZone" aria-hidden="true"></div>
 
 </main>
