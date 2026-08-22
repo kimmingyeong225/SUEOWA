@@ -1,0 +1,155 @@
+/* ==========================================================================
+   수어와 — 107 수어통역 연결 화면 (relay.html)
+   좌우 분할 없는 단일 화면, 세로 중앙 정렬. 검정 배경·Pretendard 등
+   공통 규칙은 style.css를 그대로 물려받는다.
+   ========================================================================== */
+
+.relay-stage {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: clamp(16px, 3vh, 40px);
+}
+
+/* ---------- 상단: 제목 영역 ---------- */
+
+.relay-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: none;
+}
+
+.relay-icon {
+  width: clamp(24px, 4vh, 32px);
+  height: clamp(24px, 4vh, 32px);
+  margin-bottom: 8px;
+}
+
+.relay-title {
+  margin: 0;
+  font-size: clamp(20px, 3.5vh, 28px);
+  font-weight: 600;
+  color: var(--color-fg);
+}
+
+.relay-desc {
+  margin: 12px 0 0;
+  font-size: clamp(14px, 2.25vh, 18px);
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+}
+
+/* ---------- 중앙: QR 코드 ---------- */
+
+.relay-qr-panel {
+  flex: none;
+  margin-top: clamp(16px, 5vh, 40px);
+  padding: clamp(12px, 3vh, 24px);
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+  line-height: 0;
+}
+
+.relay-qr,
+#qrFallback {
+  width: clamp(160px, 34vh, 300px);
+  height: clamp(160px, 34vh, 300px);
+  display: block;
+  overflow: hidden;
+}
+
+/* qrcode.min.js는 #qrCode 안에 canvas(또는 구형 브라우저면 table)를 직접
+   그려 넣는데, 그 canvas 자체는 생성 시 넘긴 300x300 픽셀 크기를 그대로
+   가진다. 래퍼(#qrCode)는 clamp()로 줄어들어도 내부 canvas는 그대로라
+   작은 화면에서 QR이 잘리거나 넘칠 수 있어, 내부 요소를 항상 래퍼
+   크기에 꽉 맞춘다 */
+.relay-qr canvas,
+.relay-qr img,
+.relay-qr table {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.relay-qr[hidden],
+#qrFallback[hidden] {
+  display: none;
+}
+
+/* ---------- QR 아래: 안내 문구 ---------- */
+
+.relay-instructions {
+  flex: none;
+  margin-top: clamp(14px, 3.5vh, 28px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.relay-instruction-main {
+  margin: 0;
+  font-size: clamp(16px, 2.75vh, 22px);
+  font-weight: 600;
+  color: var(--color-fg);
+  text-align: center;
+}
+
+.relay-instruction-sub {
+  margin: 10px 0 0;
+  font-size: clamp(13px, 2vh, 16px);
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.5);
+  text-align: center;
+}
+
+/* ---------- 좌측 하단: 돌아가기 버튼 ---------- */
+
+.relay-back-button {
+  position: absolute;
+  left: clamp(20px, 3vw, 40px);
+  bottom: clamp(20px, 3vh, 40px);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 100px;
+  padding: clamp(10px, 1.75vh, 14px) clamp(16px, 3.5vw, 28px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  font-family: inherit;
+  color: var(--color-fg);
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.relay-back-button:active {
+  transform: scale(0.96);
+  background: rgba(255, 255, 255, 0.11);
+}
+
+.relay-back-icon {
+  width: clamp(18px, 2.75vh, 22px);
+  height: clamp(18px, 2.75vh, 22px);
+  flex: none;
+}
+
+.relay-back-button span {
+  font-size: clamp(14px, 2.25vh, 18px);
+  font-weight: 500;
+}
+
+/* ---------- 텍스트 그림자 (네온/글로우 금지, 은은한 그림자만) ---------- */
+
+.relay-title,
+.relay-desc,
+.relay-instruction-main,
+.relay-instruction-sub,
+.relay-back-button span {
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.85);
+}

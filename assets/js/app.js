@@ -1,24 +1,21 @@
+/* 대기 화면(screen-standby) 컨트롤러. 단일 페이지 안의 한 섹션으로 동작하며
+   Kiosk.switchScreen("standby")로 다시 보일 때마다 show()가 처음부터 재생을 시작한다. */
 (function () {
   "use strict";
 
   var videoA = document.getElementById("introVideoA");
   var videoB = document.getElementById("introVideoB");
   var fallback = document.getElementById("videoFallback");
-  var tapLayer = document.getElementById("tapLayer");
 
-  var isTransitioning = false;
   var playlist = [];
   var current = 0;
   var activeEl = videoA;
   var standbyEl = videoB;
+  var started = false;
 
   function urlFor(clip) {
     return VIDEO_BASE + clip.file;
   }
-
-  // ---------------------------------------------------------------------
-  // 영상이 하나도 없을 때 보여줄 정적 대체 화면
-  // ---------------------------------------------------------------------
 
   function showFallback() {
     videoA.setAttribute("hidden", "");
@@ -93,53 +90,32 @@
     playCurrent();
   }
 
-  var urls = ATTRACT_CLIPS.map(urlFor);
-  Kiosk.probeClips(urls, function (results) {
-    playlist = ATTRACT_CLIPS.filter(function (clip) {
-      return results[urlFor(clip)];
+  function show() {
+    videoA.pause();
+    videoB.pause();
+    started = true;
+
+    var urls = ATTRACT_CLIPS.map(urlFor);
+    Kiosk.probeClips(urls, function (results) {
+      if (!started) return; // 그 사이 다른 화면으로 넘어갔으면 재생하지 않는다
+      playlist = ATTRACT_CLIPS.filter(function (clip) {
+        return results[urlFor(clip)];
+      });
+
+      if (playlist.length === 0) {
+        showFallback();
+        return;
+      }
+
+      start();
     });
-
-    if (playlist.length === 0) {
-      showFallback();
-      return;
-    }
-
-    start();
-  });
-
-  // ---------------------------------------------------------------------
-  // 메뉴 화면 전환: 터치 파장이 끝난 뒤 0.3초 페이드로 menu.html로 이동
-  // ---------------------------------------------------------------------
-
-  function goToMenu() {
-    Kiosk.fadeNavigate("menu.html");
   }
 
-  // ---------------------------------------------------------------------
-  // 터치 피드백: 터치 지점에서 파란 원이 크게 퍼지며 사라짐 (소리 없이 시각으로만)
-  // ---------------------------------------------------------------------
-
-  var spawnRipple = Kiosk.spawnRippleOn(tapLayer);
-
-  function handleTap(event) {
-    if (isTransitioning) return;
-    isTransitioning = true;
-
-    var point =
-      event.changedTouches && event.changedTouches.length
-        ? event.changedTouches[0]
-        : event;
-
-    spawnRipple(point.clientX, point.clientY);
-
-    setTimeout(function () {
-      goToMenu();
-    }, 550);
+  function hide() {
+    started = false;
+    videoA.pause();
+    videoB.pause();
   }
 
-  tapLayer.addEventListener("pointerdown", handleTap);
-
-  Kiosk.guardInput();
-  Kiosk.requestWakeLock();
-  Kiosk.fadeInOnLoad();
+  Kiosk.registerScreen("standby", { show: show, hide: hide });
 })();

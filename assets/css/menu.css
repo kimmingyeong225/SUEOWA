@@ -56,7 +56,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  padding: var(--space-lg) var(--space-md) var(--space-md);
+  padding: clamp(20px, 5vh, 40px) var(--space-md) var(--space-md);
   display: flex;
   justify-content: center;
   background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.45) 55%, rgba(0, 0, 0, 0) 100%);
@@ -64,7 +64,7 @@
 
 .menu-prompt {
   margin: 0;
-  font-size: 25px;
+  font-size: clamp(18px, 3.1vh, 25px);
   font-weight: 600;
   color: var(--color-fg);
   text-align: center;
@@ -81,7 +81,8 @@
   display: flex;
   flex-direction: column;
   background: var(--color-bg);
-  padding: 30px 34px 26px;
+  padding: clamp(16px, 3.75vh, 30px) clamp(20px, 2.5vw, 34px) clamp(14px, 3.25vh, 26px);
+  overflow: hidden;
 }
 
 /* 왼쪽 아바타 영역과의 경계: 위아래 끝까지 닿지 않고 15%씩 페이드아웃되는 얇은 선 */
@@ -107,18 +108,18 @@
   display: flex;
   align-items: baseline;
   gap: 10px;
-  margin-bottom: 18px;
+  margin-bottom: clamp(10px, 2.25vh, 18px);
 }
 
 .place-name {
   margin: 0;
-  font-size: 22px;
+  font-size: clamp(17px, 2.75vh, 22px);
   font-weight: 600;
   color: var(--color-fg);
 }
 
 .place-sub {
-  font-size: 14px;
+  font-size: clamp(11px, 1.75vh, 14px);
   font-weight: 400;
   color: rgba(255, 255, 255, 0.36);
 }
@@ -130,10 +131,11 @@
 .category-grid {
   flex: 1 1 auto;
   min-height: 0;
+  min-width: 0;
   display: grid;
   grid-template-columns: 1fr;
   grid-template-rows: repeat(3, 1fr);
-  gap: 15px;
+  gap: clamp(8px, 1.9vh, 15px);
 }
 
 .category-button {
@@ -141,15 +143,16 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 28px;
+  gap: clamp(14px, 3.5vw, 28px);
   border-radius: 20px;
   background: #15171c;
   border: 1px solid rgba(255, 255, 255, 0.11);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.06),
     0 10px 26px rgba(0, 0, 0, 0.55);
-  padding: 0 44px;
+  padding: 0 clamp(20px, 5.5vw, 44px);
   margin: 0;
+  min-height: 0;
   font-family: inherit;
   cursor: pointer;
 }
@@ -182,8 +185,8 @@
 
 .category-tile {
   position: relative;
-  width: 140px;
-  height: 140px;
+  width: clamp(84px, 15vh, 140px);
+  height: clamp(84px, 15vh, 140px);
   border-radius: 30px;
   display: flex;
   align-items: center;
@@ -194,10 +197,14 @@
 .category-icon {
   display: block;
   overflow: visible;
+  /* 아이콘 자체는 svg width/height="76" 같은 고정 픽셀 대신 타일 크기의
+     55%를 따라가도록 % 지정 (menu.js에서 width/height 속성을 안 준다) */
+  width: 55%;
+  height: 55%;
 }
 
 .category-label {
-  font-size: 28px;
+  font-size: clamp(18px, 3.2vh, 28px);
   font-weight: 600;
   color: var(--color-fg);
   text-align: left;
@@ -226,7 +233,7 @@
 
 .interpreter-cta {
   flex: none;
-  margin-top: 16px;
+  margin-top: clamp(10px, 2vh, 16px);
   width: 100%;
   display: flex;
   align-items: center;
@@ -234,7 +241,7 @@
   gap: 14px;
   border: none;
   border-radius: 18px;
-  padding: 20px;
+  padding: clamp(12px, 2.5vh, 20px);
   background: linear-gradient(180deg, #3182f0, #1f5fcc);
   box-shadow:
     0 10px 28px rgba(31, 95, 204, 0.45),
@@ -244,13 +251,13 @@
 }
 
 .interpreter-cta-icon {
-  width: 26px;
-  height: 26px;
+  width: clamp(18px, 2.6vh, 26px);
+  height: clamp(18px, 2.6vh, 26px);
   flex: none;
 }
 
 .interpreter-cta-text {
-  font-size: 20px;
+  font-size: clamp(15px, 2.5vh, 20px);
   font-weight: 600;
   color: var(--color-fg);
 }

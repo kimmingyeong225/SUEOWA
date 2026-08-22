@@ -1,10 +1,9 @@
-/* 카테고리 목록·영상·자막은 assets/js/data.js의 CATEGORIES 배열에서 가져온다.
-   다른 관광지로 교체할 때는 data.js만 바꾸면 된다. */
+/* 메뉴 화면(screen-menu) 컨트롤러. 카테고리 목록·영상·자막은
+   assets/js/data.js의 CATEGORIES 배열에서 가져온다. */
 
 (function () {
   "use strict";
 
-  // Tabler Icons(outline, MIT) 원본 path. 아이콘을 직접 그리지 않고 공식 마크업을 그대로 사용한다.
   var ICON_PATHS = {
     bus:
       '<path d="M4 17a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />' +
@@ -20,9 +19,10 @@
       '<path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M12 12l3 2" /><path d="M12 7v5" />'
   };
 
+  // 크기는 고정 px가 아니라 CSS(.category-icon)에서 타일 크기의 %로 지정한다
   function buildIconSvg(iconName, color) {
     return (
-      '<svg class="category-icon" width="76" height="76" viewBox="0 0 24 24" fill="none" ' +
+      '<svg class="category-icon" viewBox="0 0 24 24" fill="none" ' +
       'stroke="' + color + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
       ICON_PATHS[iconName] +
       "</svg>"
@@ -40,17 +40,13 @@
   var fallback = document.getElementById("avatarFallback");
   var promptEl = document.getElementById("menuPrompt");
   var placeNameEl = document.getElementById("placeName");
-  var tapLayer = document.getElementById("tapLayer");
   var grid = document.getElementById("categoryGrid");
-  var interpreterCta = document.getElementById("interpreterCta");
+  var interpreterCta = document.getElementById("menuInterpreterCta");
 
   var fallbackTimer = null;
 
   if (placeNameEl) placeNameEl.textContent = PLACE_NAME;
-
-  // ---------------------------------------------------------------------
-  // button_select.mp4 유무 처리: 대기 화면과 동일한 방식
-  // ---------------------------------------------------------------------
+  if (promptEl) promptEl.textContent = MENU_IDLE_CLIP.caption;
 
   function showFallback() {
     if (fallbackTimer) {
@@ -70,22 +66,12 @@
     avatarVideo.removeAttribute("hidden");
   }
 
-  if (promptEl) promptEl.textContent = MENU_IDLE_CLIP.caption;
-
-  if (avatarVideo) {
-    avatarVideo.src = VIDEO_BASE + MENU_IDLE_CLIP.file;
-    avatarVideo.load();
-
-    fallbackTimer = setTimeout(showFallback, 4000);
-    avatarVideo.addEventListener("error", showFallback);
-    avatarVideo.addEventListener("playing", hideFallback, { once: true });
-  } else {
-    showFallback();
-  }
+  avatarVideo.addEventListener("error", showFallback);
+  avatarVideo.addEventListener("playing", hideFallback);
 
   // ---------------------------------------------------------------------
-  // 카테고리 그리드 렌더링. 촬영된 영상이 하나도 없는 카테고리는
-  // 자동으로 흐리게 처리하고 터치를 막는다 (하드코딩 없이 파일 존재 여부로 판단).
+  // 카테고리 그리드는 한 번만 렌더링한다. 촬영된 영상이 하나도 없는
+  // 카테고리는 자동으로 흐리게 처리하고 터치를 막는다.
   // ---------------------------------------------------------------------
 
   CATEGORIES.forEach(function (cat) {
@@ -116,14 +102,13 @@
         console.log("[menu] category '" + cat.id + "' tapped but disabled — ignored");
         return;
       }
-      console.log("[menu] category '" + cat.id + "' tapped — navigating to content.html?cat=" + cat.id);
-      Kiosk.fadeNavigate("content.html?cat=" + encodeURIComponent(cat.id));
+      console.log("[menu] category '" + cat.id + "' tapped — switching to content screen");
+      Kiosk.switchScreen("content", { cat: cat.id });
     });
 
     grid.appendChild(btn);
 
     // 클립이 여러 개라도 준비 여부는 첫 번째 클립 파일 하나로 판정한다
-    // (촬영은 항상 순서대로 진행되므로, 첫 클립이 있으면 카테고리는 사용 가능한 것으로 본다)
     var firstClipUrl = VIDEO_BASE + cat.clips[0].file;
     Kiosk.probeClip(firstClipUrl, 5000, function (exists) {
       console.log(
@@ -138,30 +123,41 @@
     });
   });
 
-  // ---------------------------------------------------------------------
-  // 107 수어통역 연결 버튼
-  // ---------------------------------------------------------------------
-
   interpreterCta.addEventListener("click", function () {
     Kiosk.connectTo107();
   });
 
   // ---------------------------------------------------------------------
-  // 화면 전체 터치 피드백 (클릭 동작은 그대로 각 버튼에서 처리됨)
+  // 메뉴에 들어오면 아직 안 받아둔 나머지 클립들을 백그라운드에서 순서대로
+  // 예열한다 (첫 클립은 앱 시작 시 이미 예열됨 — content.js 참고)
   // ---------------------------------------------------------------------
 
-  var spawnRipple = Kiosk.spawnRippleOn(tapLayer);
+  function preloadRemainingClips() {
+    CATEGORIES.forEach(function (cat) {
+      cat.clips.forEach(function (clip) {
+        Kiosk.preloadClip(VIDEO_BASE + clip.file);
+      });
+    });
+  }
 
-  document.addEventListener("pointerdown", function (event) {
-    var point =
-      event.changedTouches && event.changedTouches.length
-        ? event.changedTouches[0]
-        : event;
-    spawnRipple(point.clientX, point.clientY);
-  });
+  function show() {
+    avatarVideo.src = VIDEO_BASE + MENU_IDLE_CLIP.file;
+    avatarVideo.load();
+    fallbackTimer = setTimeout(showFallback, 4000);
+    avatarVideo.play().catch(function () {});
 
-  Kiosk.guardInput();
-  Kiosk.requestWakeLock();
-  Kiosk.fadeInOnLoad();
-  Kiosk.setupIdleReturn(60000, "index.html");
+    preloadRemainingClips();
+
+    Kiosk.startIdleReturn(60000, "standby");
+  }
+
+  function hide() {
+    if (fallbackTimer) {
+      clearTimeout(fallbackTimer);
+      fallbackTimer = null;
+    }
+    avatarVideo.pause();
+  }
+
+  Kiosk.registerScreen("menu", { show: show, hide: hide });
 })();

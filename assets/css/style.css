@@ -31,10 +31,10 @@
   --space-lg: 40px;
   --space-xl: 64px;
 
-  --font-cta: 23px;
+  --font-cta: clamp(18px, 2.9vh, 23px);
 
-  --pane-video: 58%;
-  --pane-cta: 42%;
+  --pane-video: 69%;
+  --pane-cta: 27%;
 }
 
 /* ---------- 리셋 & 키오스크 기본 동작 ---------- */
@@ -93,6 +93,17 @@ img, video {
   background: var(--color-bg);
 }
 
+/* ---------- 단일 페이지 화면 전환 ----------
+   네 화면(대기/메뉴/콘텐츠/107)이 모두 하나의 문서 안에 존재하고,
+   .is-active가 붙은 것만 보인다. 페이지 이동이 없으므로 전환이 즉시 이뤄진다 */
+.screen {
+  display: none;
+}
+
+.stage.screen.is-active {
+  display: flex;
+}
+
 /* ---------- 왼쪽: 영상 영역 (58%) ----------
    아바타 카드를 좌측 영역 정중앙에 배치한다 (오른쪽 cta-pane과 같은 정렬 방식). */
 
@@ -104,13 +115,10 @@ img, video {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 10px;
+  padding: 0;
   background: var(--color-bg);
 }
 
-/* 잘리지 않게(contain) 하는 대신, 박스 자체를 영역이 허락하는 한 최대로
-   키워서 아바타가 크게 보이게 한다. 박스 배경이 페이지와 같은 완전한 검정이라
-   contain으로 생기는 여백(레터박스)이 눈에 띄지 않는다 */
 .intro-video-card {
   position: relative;
   width: 100%;
@@ -125,13 +133,11 @@ img, video {
   inset: 0;
   width: 100%;
   height: 100%;
-  /* 원본 영상 프레임에 인물 주변 여백이 넓어, contain만으로는 상반신이
-     작게 보인다. contain으로 왜곡 없이 전체를 담은 뒤, transform으로
-     화면 중앙을 확대해 상반신이 크게 보이게 한다 (손이 잘리지 않는 선에서 조정된 값) */
+  /* cover + object-position으로 왼쪽을 강조하면 자막(영상에 포함)이 잘리는
+     클립이 있어(아래 참고) contain을 유지한다. 대신 영역 폭이 58%→64%로
+     넓어진 만큼 자연히 더 크게 보인다 */
   object-fit: contain;
   object-position: center center;
-  transform: scale(1.65);
-  transform-origin: center center;
   background: var(--color-bg);
   pointer-events: none;
   /* welcome → intro → touch 전환 시 두 영상이 겹쳐 있다가 자리를 바꾸며 크로스페이드됨 */
@@ -166,7 +172,7 @@ img, video {
 
 .fallback-logo {
   margin: 0;
-  font-size: 56px;
+  font-size: clamp(34px, 7vh, 56px);
   font-weight: 700;
   letter-spacing: 0.02em;
   color: var(--color-fg);
@@ -174,10 +180,11 @@ img, video {
 
 .fallback-text {
   margin: 0;
-  font-size: 20px;
+  font-size: clamp(15px, 2.5vh, 20px);
   font-weight: 400;
   color: rgba(255, 255, 255, 0.75);
   text-align: center;
+  padding: 0 20px;
 }
 
 .status-badge {
@@ -224,10 +231,12 @@ img, video {
   justify-content: center;
   background-color: var(--color-bg);
   background-image: linear-gradient(160deg, rgba(255, 255, 255, 0.022), transparent 60%);
-  padding: var(--space-lg) var(--space-md);
+  padding: clamp(20px, 5vh, 40px) var(--space-md);
+  overflow: hidden;
 }
 
-/* 왼쪽 영상 영역과의 경계: 위아래 끝까지 닿지 않고 15%씩 페이드아웃되는 얇은 선 */
+/* 왼쪽 영상 영역과의 경계: 위아래 끝까지 닿지 않고 20%씩 페이드아웃되는
+   아주 은은한 선. 좌우가 하나의 화면으로 읽히도록 최대한 눈에 안 띄게 */
 .cta-pane::before {
   content: "";
   position: absolute;
@@ -240,8 +249,8 @@ img, video {
   background: linear-gradient(
     to bottom,
     transparent 0%,
-    rgba(255, 255, 255, 0.06) 15%,
-    rgba(255, 255, 255, 0.06) 85%,
+    rgba(255, 255, 255, 0.05) 20%,
+    rgba(255, 255, 255, 0.05) 80%,
     transparent 100%
   );
 }
@@ -251,7 +260,7 @@ img, video {
   flex-direction: column;
   align-items: center;
   /* 버튼과 문구가 하나의 덩어리로 보이도록 간격을 좁게 정리 */
-  gap: 36px;
+  gap: clamp(18px, 4.5vh, 36px);
 }
 
 .cta-button-wrap {
@@ -335,7 +344,7 @@ img, video {
 
 .cta-subtext {
   margin: 0;
-  font-size: 16px;
+  font-size: clamp(13px, 2vh, 16px);
   font-weight: 400;
   color: rgba(255, 255, 255, 0.5);
   text-align: center;

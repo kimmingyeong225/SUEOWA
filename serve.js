@@ -53,6 +53,12 @@ http
       var mime = MIME_TYPES[ext] || "application/octet-stream";
       var range = req.headers.range;
 
+      // 영상/폰트는 내용이 안 바뀌므로 브라우저 캐시를 최대한 활용한다.
+      // (카테고리 프리로드가 실제로 효과를 보려면 두 번째 요청이 캐시에서
+      // 즉시 응답돼야 하는데, 캐시 헤더가 없으면 브라우저가 매번 다시 받아올 수 있다)
+      var cacheControl =
+        ext === ".mp4" || ext === ".woff2" ? "public, max-age=31536000, immutable" : "no-cache";
+
       if (range) {
         var match = /bytes=(\d*)-(\d*)/.exec(range);
         var start = match[1] ? parseInt(match[1], 10) : 0;
@@ -62,7 +68,9 @@ http
           "Content-Type": mime,
           "Content-Length": end - start + 1,
           "Content-Range": "bytes " + start + "-" + end + "/" + stats.size,
-          "Accept-Ranges": "bytes"
+          "Accept-Ranges": "bytes",
+          "Cache-Control": cacheControl,
+          "Last-Modified": stats.mtime.toUTCString()
         });
         fs.createReadStream(filePath, { start: start, end: end }).pipe(res);
         return;
@@ -71,7 +79,9 @@ http
       res.writeHead(200, {
         "Content-Type": mime,
         "Content-Length": stats.size,
-        "Accept-Ranges": "bytes"
+        "Accept-Ranges": "bytes",
+        "Cache-Control": cacheControl,
+        "Last-Modified": stats.mtime.toUTCString()
       });
       fs.createReadStream(filePath).pipe(res);
     });

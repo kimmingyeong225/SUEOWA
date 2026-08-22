@@ -1,3 +1,9 @@
+/* 콘텐츠 재생 화면(screen-content) 컨트롤러.
+   video 2개(A/B)를 겹쳐두고 하나는 재생, 하나는 다음 클립을 미리 로드해
+   두었다가 opacity 전환으로 즉시 교체한다 (대기 화면과 같은 방식).
+   이전/다시보기처럼 미리 로드해두지 않은 클립으로 이동할 때만
+   그 자리에서 새로 불러온다 — 그 경우에도 앱 시작·메뉴 진입 시 미리
+   예열해둔 브라우저 캐시 덕분에 대체로 빠르게 뜬다. */
 (function () {
   "use strict";
 
@@ -8,6 +14,31 @@
     4: "MEDIA_ERR_SRC_NOT_SUPPORTED"
   };
 
+  var videoA = document.getElementById("contentVideoA");
+  var videoB = document.getElementById("contentVideoB");
+  var fallback = document.getElementById("contentFallback");
+  var loadingEl = document.getElementById("contentLoading");
+  var categoryLabelEl = document.getElementById("categoryLabel");
+  var placeSubEl = document.getElementById("placeSub");
+  var progressCountEl = document.getElementById("progressCount");
+  var progressFillEl = document.getElementById("progressFill");
+  var backButton = document.getElementById("contentBackButton");
+  var replayButton = document.getElementById("replayButton");
+  var prevButton = document.getElementById("prevButton");
+  var nextButton = document.getElementById("nextButton");
+
+  var category = null;
+  var playlist = [];
+  var current = 0;
+  var everPlayed = false;
+  var activeEl = videoA;
+  var standbyEl = videoB;
+  var loadingShowTimer = null;
+
+  function urlFor(clip) {
+    return VIDEO_BASE + clip.file;
+  }
+
   function findCategory(id) {
     for (var i = 0; i < CATEGORIES.length; i++) {
       if (CATEGORIES[i].id === id) return CATEGORIES[i];
@@ -15,65 +46,65 @@
     return null;
   }
 
-  var catId = new URLSearchParams(window.location.search).get("cat");
-  console.log("[content] script start — url search param cat = '" + catId + "'");
-
-  var category = findCategory(catId);
-
-  var video = document.getElementById("contentVideo");
-  var fallback = document.getElementById("contentFallback");
-  var categoryLabelEl = document.getElementById("categoryLabel");
-  var placeSubEl = document.getElementById("placeSub");
-  var progressCountEl = document.getElementById("progressCount");
-  var progressFillEl = document.getElementById("progressFill");
-  var backButton = document.getElementById("backButton");
-  var replayButton = document.getElementById("replayButton");
-  var prevButton = document.getElementById("prevButton");
-  var nextButton = document.getElementById("nextButton");
-  var tapLayer = document.getElementById("tapLayer");
-
-  placeSubEl.textContent = PLACE_NAME + " 수어 안내";
-
-  function goToMenu() {
-    console.log("[content] returning to menu.html");
-    Kiosk.fadeNavigate("menu.html");
-  }
-
-  backButton.addEventListener("click", goToMenu);
-
-  if (!category) {
-    console.error("[content] no category found for id '" + catId + "' — returning to menu");
-    goToMenu();
-    return;
-  }
-
-  console.log(
-    "[content] category '" + category.id + "' (" + category.label + ") resolved, " +
-    category.clips.length + " clip(s) defined: " +
-    category.clips.map(function (c) { return c.file; }).join(", ")
-  );
-
-  categoryLabelEl.textContent = category.label;
-
   // ---------------------------------------------------------------------
-  // 정의된 클립을 순서대로 재생 시도한다. 사전에 모든 파일의 존재 여부를
-  // 따로 확인하지 않고(불필요한 지연/실패 지점을 줄이기 위해), 실제 재생
-  // 시도 중 error 이벤트가 나면 그 클립만 건너뛰고 다음 클립으로 넘어간다.
+  // 로딩 표시: 0.3초 안에 재생이 시작되면 아예 보여주지 않는다.
+  // 깜빡임 없이 부드러운 페이드로만 나타났다 사라진다
   // ---------------------------------------------------------------------
 
-  var playlist = category.clips;
-  var current = 0;
-  var everPlayed = false;
+  function scheduleLoading() {
+    cancelLoadingHide();
+    if (loadingShowTimer) return;
+    loadingShowTimer = setTimeout(function () {
+      loadingShowTimer = null;
+      loadingEl.hidden = false;
+      requestAnimationFrame(function () {
+        loadingEl.classList.add("is-visible");
+      });
+    }, 300);
+  }
+
+  function cancelLoadingHide() {
+    if (loadingShowTimer) {
+      clearTimeout(loadingShowTimer);
+      loadingShowTimer = null;
+    }
+  }
+
+  function hideLoading() {
+    cancelLoadingHide();
+    if (loadingEl.classList.contains("is-visible")) {
+      loadingEl.classList.remove("is-visible");
+      setTimeout(function () {
+        loadingEl.hidden = true;
+      }, 300);
+    } else {
+      loadingEl.hidden = true;
+    }
+  }
+
+  // ---------------------------------------------------------------------
+  // 대체 화면 (카테고리 전체 영상이 하나도 없을 때)
+  // ---------------------------------------------------------------------
 
   function showFallback() {
-    video.setAttribute("hidden", "");
+    videoA.setAttribute("hidden", "");
+    videoB.setAttribute("hidden", "");
     fallback.removeAttribute("hidden");
   }
 
   function hideFallback() {
     fallback.setAttribute("hidden", "");
-    video.removeAttribute("hidden");
+    videoA.removeAttribute("hidden");
+    videoB.removeAttribute("hidden");
   }
+
+  function goToMenu() {
+    Kiosk.switchScreen("menu");
+  }
+
+  // ---------------------------------------------------------------------
+  // 재생/전환
+  // ---------------------------------------------------------------------
 
   function updateProgress() {
     progressCountEl.textContent = (current + 1) + " / " + playlist.length;
@@ -82,33 +113,59 @@
     nextButton.disabled = current >= playlist.length - 1;
   }
 
-  function playCurrent() {
-    var clip = playlist[current];
-    var url = VIDEO_BASE + clip.file;
+  function preloadStandby() {
+    var nextIdx = current + 1;
+    if (nextIdx >= playlist.length) return;
+    var url = urlFor(playlist[nextIdx]);
+    standbyEl.src = url;
+    standbyEl.load();
+    console.log("[content] preloading standby (next) clip: " + url);
+  }
+
+  function playActive() {
     updateProgress();
-    console.log("[content] loading clip " + (current + 1) + "/" + playlist.length + ": " + url);
-
-    video.src = url;
-    video.load();
-
-    var playPromise = video.play();
+    scheduleLoading();
+    console.log(
+      "[content] playing clip " + (current + 1) + "/" + playlist.length + ": " + activeEl.src
+    );
+    var playPromise = activeEl.play();
     if (playPromise && playPromise.catch) {
       playPromise.catch(function (err) {
         console.error(
-          "[content] video.play() rejected for " + url + " — " +
+          "[content] video.play() rejected for " + activeEl.src + " — " +
           (err && err.name ? err.name : "unknown error") + ": " +
           (err && err.message ? err.message : err)
         );
         advance();
       });
     }
+    preloadStandby();
   }
 
-  // 사용자가 이전/다음 버튼으로 직접 이동
+  // standby가 이미 다음 클립을 들고 있으면 자리만 바꿔 즉시 재생(크로스페이드),
+  // 아니면(이전으로 가기 등) 그 자리에서 새로 불러온다
   function goToClip(index) {
     if (index < 0 || index >= playlist.length) return;
-    current = index;
-    playCurrent();
+
+    var isPreloadedNext =
+      index === current + 1 &&
+      standbyEl.currentSrc &&
+      standbyEl.currentSrc.indexOf(playlist[index].file) !== -1;
+
+    if (isPreloadedNext) {
+      var tmp = activeEl;
+      activeEl = standbyEl;
+      standbyEl = tmp;
+      activeEl.classList.add("is-active");
+      standbyEl.classList.remove("is-active");
+      current = index;
+      playActive();
+    } else {
+      current = index;
+      activeEl.src = urlFor(playlist[current]);
+      activeEl.load();
+      playActive();
+    }
   }
 
   function advance() {
@@ -126,41 +183,48 @@
       goToMenu();
       return;
     }
-    current += 1;
-    playCurrent();
+    goToClip(current + 1);
   }
 
-  video.addEventListener("loadedmetadata", function () {
-    console.log("[content] loadedmetadata: " + video.src + " (duration " + video.duration + "s)");
-  });
-
-  video.addEventListener("playing", function () {
-    everPlayed = true;
-    hideFallback();
-    console.log("[content] playing: " + video.src);
-  });
-
-  video.addEventListener("ended", function () {
-    console.log("[content] ended: " + video.src);
+  function onEnded(event) {
+    if (event.target !== activeEl) return;
+    console.log("[content] ended: " + activeEl.src);
     advance();
-  });
+  }
 
-  video.addEventListener("error", function () {
-    var mediaError = video.error;
+  function onError(event) {
+    if (event.target !== activeEl) return;
+    var mediaError = activeEl.error;
     var code = mediaError ? mediaError.code : "?";
     var name = MEDIA_ERROR_NAMES[code] || "UNKNOWN";
     console.error(
       "[content] error loading clip " + (current + 1) + "/" + playlist.length + ": " +
-      video.src + " — code " + code + " (" + name + ")"
+      activeEl.src + " — code " + code + " (" + name + ")"
     );
     advance();
-  });
+  }
+
+  function onPlaying(event) {
+    if (event.target !== activeEl) return;
+    everPlayed = true;
+    hideFallback();
+    hideLoading();
+    console.log("[content] playing event fired: " + activeEl.src);
+  }
+
+  videoA.addEventListener("ended", onEnded);
+  videoB.addEventListener("ended", onEnded);
+  videoA.addEventListener("error", onError);
+  videoB.addEventListener("error", onError);
+  videoA.addEventListener("playing", onPlaying);
+  videoB.addEventListener("playing", onPlaying);
+
+  backButton.addEventListener("click", goToMenu);
 
   replayButton.addEventListener("click", function () {
     console.log("[content] replay requested — restarting playlist");
-    current = 0;
     everPlayed = false;
-    playCurrent();
+    goToClip(0);
   });
 
   prevButton.addEventListener("click", function () {
@@ -173,25 +237,59 @@
     goToClip(current + 1);
   });
 
-  hideFallback();
-  playCurrent();
-
   // ---------------------------------------------------------------------
-  // 화면 전체 터치 피드백
+  // 앱이 처음 뜰 때 모든 카테고리의 첫 클립을 백그라운드에서 예열해둔다.
+  // (화면 표시를 막지 않는 비동기 fire-and-forget)
   // ---------------------------------------------------------------------
 
-  var spawnRipple = Kiosk.spawnRippleOn(tapLayer);
-
-  document.addEventListener("pointerdown", function (event) {
-    var point =
-      event.changedTouches && event.changedTouches.length
-        ? event.changedTouches[0]
-        : event;
-    spawnRipple(point.clientX, point.clientY);
+  CATEGORIES.forEach(function (cat) {
+    Kiosk.preloadClip(urlFor(cat.clips[0]));
   });
 
-  Kiosk.guardInput();
-  Kiosk.requestWakeLock();
-  Kiosk.fadeInOnLoad();
-  Kiosk.setupIdleReturn(60000, "index.html");
+  // ---------------------------------------------------------------------
+  // 화면 진입/이탈
+  // ---------------------------------------------------------------------
+
+  function show(opts) {
+    var catId = opts && opts.cat;
+    category = findCategory(catId);
+
+    if (!category) {
+      console.error("[content] no category found for id '" + catId + "' — returning to menu");
+      goToMenu();
+      return;
+    }
+
+    console.log(
+      "[content] category '" + category.id + "' (" + category.label + ") resolved, " +
+      category.clips.length + " clip(s): " +
+      category.clips.map(function (c) { return c.file; }).join(", ")
+    );
+
+    categoryLabelEl.textContent = category.label;
+    placeSubEl.textContent = PLACE_NAME + " 수어 안내";
+
+    playlist = category.clips;
+    current = 0;
+    everPlayed = false;
+    activeEl = videoA;
+    standbyEl = videoB;
+    videoA.classList.add("is-active");
+    videoB.classList.remove("is-active");
+    hideFallback();
+
+    activeEl.src = urlFor(playlist[0]);
+    activeEl.load();
+    playActive();
+
+    Kiosk.startIdleReturn(60000, "standby");
+  }
+
+  function hide() {
+    videoA.pause();
+    videoB.pause();
+    hideLoading();
+  }
+
+  Kiosk.registerScreen("content", { show: show, hide: hide });
 })();
