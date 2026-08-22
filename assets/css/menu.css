@@ -1,0 +1,258 @@
+/* ==========================================================================
+   수어와 — 메뉴 화면 (카테고리 선택)
+   대기 화면 다음 단계. 공통 리셋/폰트/터치 파장/유휴 규칙은 style.css를 그대로 사용.
+   ========================================================================== */
+
+/* ---------- 왼쪽: 아바타 영역 (42%) ---------- */
+
+.avatar-pane {
+  position: relative;
+  flex: 0 0 42%;
+  width: 42%;
+  height: 100%;
+  background: var(--color-bg);
+  overflow: hidden;
+}
+
+.menu-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* button_select2.mp4는 1920x1080 가로 영상이라, 세로로 좁고 긴 이 영역에
+     contain을 쓰면 인물이 작게 보인다. cover로 세로를 꽉 채우고 좌우를 크롭해
+     인물이 크게 보이게 한다 */
+  object-fit: cover;
+  object-position: center;
+  background: var(--color-bg);
+  pointer-events: none;
+}
+
+.menu-video[hidden] {
+  display: none;
+}
+
+/* 영상 위/아래 가장자리를 검정 배경과 자연스럽게 잇는 비네트 */
+.menu-video-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.55) 0%,
+    rgba(0, 0, 0, 0) 18%,
+    rgba(0, 0, 0, 0) 74%,
+    rgba(0, 0, 0, 0.65) 100%
+  );
+}
+
+.menu-status-label {
+  font-size: 14px;
+}
+
+/* button_select2.mp4에는 자막이 없어서 여기만 웹앱에서 직접 자막을 띄운다 */
+.menu-prompt-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: var(--space-lg) var(--space-md) var(--space-md);
+  display: flex;
+  justify-content: center;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.45) 55%, rgba(0, 0, 0, 0) 100%);
+}
+
+.menu-prompt {
+  margin: 0;
+  font-size: 25px;
+  font-weight: 600;
+  color: var(--color-fg);
+  text-align: center;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.85);
+}
+
+/* ---------- 오른쪽: 카테고리 영역 (58%) ---------- */
+
+.content-pane {
+  position: relative;
+  flex: 0 0 58%;
+  width: 58%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg);
+  padding: 30px 34px 26px;
+}
+
+/* 왼쪽 아바타 영역과의 경계: 위아래 끝까지 닿지 않고 15%씩 페이드아웃되는 얇은 선 */
+.content-pane::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 1px;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(255, 255, 255, 0.07) 15%,
+    rgba(255, 255, 255, 0.07) 85%,
+    transparent 100%
+  );
+}
+
+.place-header {
+  flex: none;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.place-name {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--color-fg);
+}
+
+.place-sub {
+  font-size: 14px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.36);
+}
+
+/* ---------- 카테고리 버튼: 1열x3행 (가로로 넓은 행 3개) ----------
+   3개 카테고리를 3열로 나열하면 세로로 지나치게 길고 좁은 버튼이 되어
+   1열x3행으로 쌓고, 버튼 내부는 아이콘-라벨을 가로로 배치해 넓은 공간을 활용한다. */
+
+.category-grid {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: repeat(3, 1fr);
+  gap: 15px;
+}
+
+.category-button {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 28px;
+  border-radius: 20px;
+  background: #15171c;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 10px 26px rgba(0, 0, 0, 0.55);
+  padding: 0 44px;
+  margin: 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* 버튼 상단 가장자리의 얇은 하이라이트 라인 */
+.category-button::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 14%;
+  right: 14%;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
+}
+
+.category-button.is-selected {
+  border-color: rgba(61, 139, 255, 0.65);
+  background: #16202e;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 12px 32px rgba(31, 95, 204, 0.34);
+}
+
+/* 촬영된 영상이 하나도 없는 카테고리: 흐리게 + 터치 비활성화 */
+.category-button.is-disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.category-tile {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  border-radius: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+
+.category-icon {
+  display: block;
+  overflow: visible;
+}
+
+.category-label {
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--color-fg);
+  text-align: left;
+}
+
+/* "준비 중" 배지 — 아이콘 타일 우상단 */
+.category-badge {
+  position: absolute;
+  top: -8px;
+  right: -10px;
+  padding: 5px 11px;
+  border-radius: 100px;
+  background: rgba(20, 22, 27, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  white-space: nowrap;
+}
+
+.category-badge[hidden] {
+  display: none;
+}
+
+/* ---------- 하단 107 버튼 (전체 폭) ---------- */
+
+.interpreter-cta {
+  flex: none;
+  margin-top: 16px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  border: none;
+  border-radius: 18px;
+  padding: 20px;
+  background: linear-gradient(180deg, #3182f0, #1f5fcc);
+  box-shadow:
+    0 10px 28px rgba(31, 95, 204, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.interpreter-cta-icon {
+  width: 26px;
+  height: 26px;
+  flex: none;
+}
+
+.interpreter-cta-text {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--color-fg);
+}
+
+/* .tap-layer--passive 는 모든 화면에서 공유하므로 style.css로 옮김 */

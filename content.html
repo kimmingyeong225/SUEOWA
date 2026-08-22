@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1340, height=800, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>수어와 — 안내 영상</title>
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/content.css">
+</head>
+<body>
+
+<main id="stage" class="stage player-stage">
+
+  <header class="player-topbar">
+    <button type="button" class="back-button" id="backButton">
+      <svg class="back-icon" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.4"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M15 6l-6 6l6 6" />
+      </svg>
+      <span>메뉴로 돌아가기</span>
+    </button>
+
+    <div class="player-title">
+      <h1 class="player-category" id="categoryLabel"></h1>
+      <span class="player-place" id="placeSub"></span>
+    </div>
+
+    <div class="status-badge status-badge--inline">
+      <span class="status-dot"></span>
+      <span class="status-label">수어 안내 중</span>
+    </div>
+  </header>
+
+  <!-- 영상: 화면 중앙에 크게, 손이 잘 보이도록 상반신 위주로 크롭.
+       카드 비율을 고정해서 창 크기가 달라져도 크롭 결과가 항상 같게 유지한다 -->
+  <div class="player-video-wrap">
+    <div class="player-video-card">
+      <video id="contentVideo" class="player-video" muted playsinline
+             disablepictureinpicture disableremoteplayback preload="auto"></video>
+
+      <!-- 해당 카테고리의 영상이 하나도 없을 때 보여줄 정적 대체 화면 -->
+      <div id="contentFallback" class="video-fallback" hidden>
+        <p class="fallback-logo">수어와</p>
+        <p class="fallback-text">준비된 안내 영상이 없습니다</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 재생바: 영상 바로 아래 -->
+  <div class="player-progress">
+    <span class="player-progress-count" id="progressCount">1 / 1</span>
+    <div class="player-progress-track">
+      <div class="player-progress-fill" id="progressFill"></div>
+    </div>
+  </div>
+
+  <div class="player-actions">
+    <button type="button" class="nav-button" id="prevButton">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M15 6l-6 6l6 6" />
+      </svg>
+      <span>이전</span>
+    </button>
+
+    <button type="button" class="nav-button nav-button--replay" id="replayButton">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" />
+        <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" />
+      </svg>
+      <span>처음부터 다시 보기</span>
+    </button>
+
+    <button type="button" class="nav-button nav-button--primary" id="nextButton">
+      <span>다음</span>
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M9 6l6 6l-6 6" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- 화면 전체 터치 피드백용 레이어 -->
+  <div id="tapLayer" class="tap-layer tap-layer--passive" aria-hidden="true"></div>
+
+</main>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/common.js"></script>
+<script src="assets/js/content.js"></script>
+</body>
+</html>

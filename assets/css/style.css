@@ -1,0 +1,400 @@
+/* ==========================================================================
+   수어와 — 수어 안내 키오스크 대기 화면 (attract screen)
+   갤럭시탭 A9+ 가로 모드 1340x800 / Chrome 키오스크 모드 기준
+   ========================================================================== */
+
+@font-face {
+  font-family: "Pretendard";
+  src: url("../fonts/Pretendard-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Pretendard";
+  src: url("../fonts/Pretendard-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --color-bg: #000000;
+  --color-fg: #ffffff;
+  --color-blue-light: #4C93FF;
+  --color-blue: #1B6EF3;
+  --color-blue-deep: #082B70;
+
+  --space-xs: 8px;
+  --space-sm: 16px;
+  --space-md: 24px;
+  --space-lg: 40px;
+  --space-xl: 64px;
+
+  --font-cta: 23px;
+
+  --pane-video: 58%;
+  --pane-cta: 42%;
+}
+
+/* ---------- 리셋 & 키오스크 기본 동작 ---------- */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: var(--color-bg);
+  color: var(--color-fg);
+  overflow: hidden;
+  overscroll-behavior: none;
+  font-family: "Pretendard", -apple-system, "Malgun Gothic", sans-serif;
+  -webkit-text-size-adjust: 100%;
+}
+
+html, body, div, section, p, span, button, svg {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* 화면 전환: 0.3초 페이드. page-fade-in은 진입 시, page-fade-out은 이탈 시 */
+body {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+body.page-fade-in,
+body.page-fade-out {
+  opacity: 0;
+}
+
+body {
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+img, video {
+  -webkit-user-drag: none;
+}
+
+/* ---------- 전체 레이아웃 ---------- */
+
+.stage {
+  position: relative;
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  background: var(--color-bg);
+}
+
+/* ---------- 왼쪽: 영상 영역 (58%) ----------
+   아바타 카드를 좌측 영역 정중앙에 배치한다 (오른쪽 cta-pane과 같은 정렬 방식). */
+
+.video-pane {
+  position: relative;
+  flex: 0 0 var(--pane-video);
+  width: var(--pane-video);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  background: var(--color-bg);
+}
+
+/* 잘리지 않게(contain) 하는 대신, 박스 자체를 영역이 허락하는 한 최대로
+   키워서 아바타가 크게 보이게 한다. 박스 배경이 페이지와 같은 완전한 검정이라
+   contain으로 생기는 여백(레터박스)이 눈에 띄지 않는다 */
+.intro-video-card {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 24px;
+  overflow: hidden;
+  background: #000000;
+}
+
+.intro-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* 원본 영상 프레임에 인물 주변 여백이 넓어, contain만으로는 상반신이
+     작게 보인다. contain으로 왜곡 없이 전체를 담은 뒤, transform으로
+     화면 중앙을 확대해 상반신이 크게 보이게 한다 (손이 잘리지 않는 선에서 조정된 값) */
+  object-fit: contain;
+  object-position: center center;
+  transform: scale(1.65);
+  transform-origin: center center;
+  background: var(--color-bg);
+  pointer-events: none;
+  /* welcome → intro → touch 전환 시 두 영상이 겹쳐 있다가 자리를 바꾸며 크로스페이드됨 */
+  opacity: 0;
+  z-index: 0;
+  transition: opacity 0.3s ease;
+}
+
+.intro-video.is-active {
+  opacity: 1;
+  z-index: 1;
+}
+
+.intro-video[hidden] {
+  display: none;
+}
+
+.video-fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  background: var(--color-bg);
+}
+
+.video-fallback[hidden] {
+  display: none;
+}
+
+.fallback-logo {
+  margin: 0;
+  font-size: 56px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--color-fg);
+}
+
+.fallback-text {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.75);
+  text-align: center;
+}
+
+.status-badge {
+  position: absolute;
+  top: var(--space-md);
+  left: var(--space-md);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #2ecc71;
+  box-shadow: 0 0 6px rgba(46, 204, 113, 0.8);
+  animation: status-pulse 2.8s ease-in-out infinite;
+}
+
+/* 밝기(opacity)만 오가는 변화. 2.8초 주기, 깜빡임 아님 */
+@keyframes status-pulse {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
+}
+
+.status-label {
+  font-size: 15px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* ---------- 오른쪽: 터치 안내 영역 (42%) ---------- */
+
+.cta-pane {
+  position: relative;
+  flex: 0 0 var(--pane-cta);
+  width: var(--pane-cta);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-bg);
+  background-image: linear-gradient(160deg, rgba(255, 255, 255, 0.022), transparent 60%);
+  padding: var(--space-lg) var(--space-md);
+}
+
+/* 왼쪽 영상 영역과의 경계: 위아래 끝까지 닿지 않고 15%씩 페이드아웃되는 얇은 선 */
+.cta-pane::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 1px;
+  z-index: 5;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(255, 255, 255, 0.06) 15%,
+    rgba(255, 255, 255, 0.06) 85%,
+    transparent 100%
+  );
+}
+
+.cta-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* 버튼과 문구가 하나의 덩어리로 보이도록 간격을 좁게 정리 */
+  gap: 36px;
+}
+
+.cta-button-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 버튼 뒤 아주 은은한 파란 글로우. 넓고 옅게 퍼져 공이 화면에 박힌 게 아니라
+   떠 있는 느낌을 주도록 함 */
+.cta-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 448px;
+  height: 448px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(27, 110, 243, 0.22) 0%, rgba(27, 110, 243, 0.08) 45%, rgba(27, 110, 243, 0) 70%);
+  opacity: 0.25;
+  z-index: 0;
+  pointer-events: none;
+  animation: cta-glow-breathe 6s ease-in-out infinite;
+}
+
+@keyframes cta-glow-breathe {
+  0%, 100% { opacity: 0.175; }
+  50%      { opacity: 0.275; }
+}
+
+.cta-button {
+  position: relative;
+  z-index: 1;
+  width: clamp(98px, 17.5vh, 154px);
+  height: clamp(98px, 17.5vh, 154px);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 33% 28%, var(--color-blue-light) 0%, var(--color-blue) 55%, var(--color-blue-deep) 100%);
+  box-shadow:
+    inset 0 -18px 26px rgba(3, 12, 40, 0.45),
+    inset 0 4px 8px rgba(255, 255, 255, 0.5),
+    0 0 36px 6px rgba(27, 110, 243, 0.22);
+  will-change: transform;
+  animation: cta-pulse 2.8s ease-in-out infinite;
+}
+
+/* 버튼의 유일한 움직임: 5% 이내 확대, 2.8초 주기의 부드러운 펄스.
+   영상(왼쪽)이 시각적 주인공이 되도록 이 펄스 하나만 남기고
+   테두리 링 핑 등 추가 애니메이션은 넣지 않는다 */
+@keyframes cta-pulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.05); }
+}
+
+.cta-icon {
+  width: 45%;
+  height: 45%;
+  display: block;
+  overflow: visible;
+}
+
+.cta-text-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* 主문구 ↔ 보조문구: 같은 덩어리이므로 가깝게 붙임 */
+  gap: 12px;
+}
+
+.cta-text {
+  margin: 0;
+  font-size: var(--font-cta);
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--color-fg);
+}
+
+.cta-subtext {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.5);
+  text-align: center;
+}
+
+/* ---------- 텍스트 공통 그림자 (네온/글로우 금지, 은은한 그림자만) ---------- */
+
+.cta-text,
+.cta-subtext,
+.status-label,
+.fallback-logo,
+.fallback-text {
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.85);
+}
+
+/* ---------- 화면 전체 터치 레이어 & 피드백 ---------- */
+
+.tap-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  touch-action: none;
+}
+
+/* 버튼이 있는 화면(menu.html, content.html)에서는 터치 파장만 보여주고
+   클릭은 그대로 아래 버튼으로 전달되게 한다 */
+.tap-layer--passive {
+  pointer-events: none;
+}
+
+/* 터치 지점에서 크게 퍼지며 사라지는 파란 원 (0.55초, 1회성) */
+.ripple {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  margin: -12px 0 0 -12px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, var(--color-blue-light) 0%, var(--color-blue) 55%, rgba(27, 110, 243, 0) 78%);
+  transform: scale(0);
+  opacity: 0.65;
+  will-change: transform, opacity;
+  animation: ripple-expand 550ms ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes ripple-expand {
+  to {
+    transform: scale(50);
+    opacity: 0;
+  }
+}
+
+/* ---------- 광과민성 대응: 모션 축소 설정 시 모든 애니메이션 정지 ----------
+   duration을 0에 가깝게 줄이되 완전히 없애지는 않아, JS의 animationend
+   리스너(터치 파장 정리 등)가 계속 정상 동작해 메모리 누수를 막는다 */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

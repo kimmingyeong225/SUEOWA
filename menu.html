@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1340, height=800, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>수어와 — 메뉴</title>
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/menu.css">
+</head>
+<body>
+
+<main id="stage" class="stage">
+
+  <!-- 왼쪽 31% : 아바타 영역 -->
+  <section class="avatar-pane" aria-hidden="true">
+    <video id="avatarVideo" class="menu-video" autoplay muted loop playsinline
+           disablepictureinpicture disableremoteplayback preload="auto"></video>
+
+    <!-- button_select.mp4가 없을 때 보여줄 정적 대체 화면 -->
+    <div id="avatarFallback" class="video-fallback" hidden>
+      <p class="fallback-logo">수어와</p>
+      <p class="fallback-text">아바타 수어 안내 영상을 준비 중입니다</p>
+    </div>
+
+    <div class="menu-video-vignette"></div>
+
+    <div class="status-badge">
+      <span class="status-dot"></span>
+      <span class="status-label menu-status-label">수어 안내 중</span>
+    </div>
+
+    <!-- button_select2.mp4에는 자막이 없어서 여기서만 직접 자막을 띄운다 -->
+    <div class="menu-prompt-bar">
+      <p class="menu-prompt" id="menuPrompt"></p>
+    </div>
+  </section>
+
+  <!-- 오른쪽 69% : 카테고리 선택 -->
+  <section class="content-pane">
+    <header class="place-header">
+      <h1 class="place-name" id="placeName">태종대</h1>
+      <span class="place-sub">수어 안내</span>
+    </header>
+
+    <div class="category-grid" id="categoryGrid"></div>
+
+    <button type="button" class="interpreter-cta" id="interpreterCta">
+      <svg class="interpreter-cta-icon" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+        <rect x="7" y="17" width="34" height="30" rx="6" stroke="#ffffff" stroke-width="4"/>
+        <path d="M41 27 L56 19 V45 L41 37 Z" fill="#ffffff"/>
+      </svg>
+      <span class="interpreter-cta-text">다른 질문이 있어요 · 수어통역 연결 107</span>
+    </button>
+  </section>
+
+  <!-- 화면 전체 터치 피드백용 레이어 (클릭은 그대로 아래 요소로 전달됨) -->
+  <div id="tapLayer" class="tap-layer tap-layer--passive" aria-hidden="true"></div>
+
+</main>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/common.js"></script>
+<script src="assets/js/menu.js"></script>
+</body>
+</html>
