@@ -12,7 +12,6 @@
   var activeEl = videoA;
   var standbyEl = videoB;
   var started = false;
-  var probedPlaylist = null; // 최초 1회만 존재 여부 확인, 이후 재진입 시 재확인 생략
 
   function urlFor(clip) {
     return VIDEO_BASE + clip.file;
@@ -96,23 +95,12 @@
     videoB.pause();
     started = true;
 
-    if (probedPlaylist) {
-      playlist = probedPlaylist;
-      if (playlist.length === 0) {
-        showFallback();
-        return;
-      }
-      start();
-      return;
-    }
-
     var urls = ATTRACT_CLIPS.map(urlFor);
     Kiosk.probeClips(urls, function (results) {
       if (!started) return; // 그 사이 다른 화면으로 넘어갔으면 재생하지 않는다
       playlist = ATTRACT_CLIPS.filter(function (clip) {
         return results[urlFor(clip)];
       });
-      probedPlaylist = playlist;
 
       if (playlist.length === 0) {
         showFallback();
