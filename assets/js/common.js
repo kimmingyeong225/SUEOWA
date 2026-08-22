@@ -267,33 +267,68 @@
   // ---------------------------------------------------------------------
   // 백그라운드 프리로드: 화면에 보이지 않는 <video preload="auto">로
   // 미리 받아둬서, 실제 재생 시점엔 서버 캐시(serve.js의 Cache-Control)에서
-  // 바로 응답되게 한다. 같은 URL은 한 번만 예열한다
+  // 바로 응답되게 한다. 같은 URL은 한 번만 예열한다.
+  //
+  // 한꺼번에 여러 개를 동시에 받으면 지금 화면에 실제로 보여줘야 하는
+  // 영상(대기화면/메뉴 아바타)과 대역폭·커넥션을 놓고 경쟁해 오히려
+  // 그 영상이 늦게 뜨는 역효과가 난다. 그래서 (1) 부팅 직후 약간의
+  // 여유를 두고 (2) 한 번에 하나씩만 순차적으로 예열한다.
   // ---------------------------------------------------------------------
 
   var preloadedUrls = {};
   var preloadPool = [];
+  var preloadQueue = [];
+  var preloadActive = 0;
+  var PRELOAD_CONCURRENCY = 1;
+  var preloadGateOpen = false;
+
+  setTimeout(function () {
+    preloadGateOpen = true;
+    pumpPreloadQueue();
+  }, 2500);
+
+  function pumpPreloadQueue() {
+    if (!preloadGateOpen) return;
+
+    while (preloadActive < PRELOAD_CONCURRENCY && preloadQueue.length) {
+      (function (url) {
+        preloadActive += 1;
+
+        var probe = document.createElement("video");
+        probe.preload = "auto";
+        probe.muted = true;
+        probe.style.display = "none";
+
+        function settle(msg) {
+          probe.removeEventListener("canplaythrough", onReady);
+          probe.removeEventListener("error", onErr);
+          console.log("[Kiosk.preloadClip] " + msg + ": " + url);
+          preloadActive -= 1;
+          pumpPreloadQueue();
+        }
+
+        function onReady() {
+          settle("warmed");
+        }
+        function onErr() {
+          settle("failed (probably missing file)");
+        }
+
+        probe.addEventListener("canplaythrough", onReady);
+        probe.addEventListener("error", onErr);
+
+        probe.src = url;
+        probe.load();
+        preloadPool.push(probe); // GC로 중간에 취소되지 않도록 참조 유지
+      })(preloadQueue.shift());
+    }
+  }
 
   Kiosk.preloadClip = function (url) {
     if (!url || preloadedUrls[url]) return;
     preloadedUrls[url] = true;
-
-    var probe = document.createElement("video");
-    probe.preload = "auto";
-    probe.muted = true;
-    probe.style.display = "none";
-
-    probe.addEventListener("canplaythrough", function onReady() {
-      probe.removeEventListener("canplaythrough", onReady);
-      console.log("[Kiosk.preloadClip] warmed: " + url);
-    });
-    probe.addEventListener("error", function onErr() {
-      probe.removeEventListener("error", onErr);
-      console.log("[Kiosk.preloadClip] failed (probably missing file): " + url);
-    });
-
-    probe.src = url;
-    probe.load();
-    preloadPool.push(probe); // GC로 중간에 취소되지 않도록 참조 유지
+    preloadQueue.push(url);
+    pumpPreloadQueue();
   };
 
   Kiosk.preloadClips = function (urls) {
