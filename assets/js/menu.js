@@ -40,13 +40,15 @@
   var fallback = document.getElementById("avatarFallback");
   var promptEl = document.getElementById("menuPrompt");
   var placeNameEl = document.getElementById("placeName");
+  var placeSubEl = document.getElementById("placeSubLabel");
   var grid = document.getElementById("categoryGrid");
   var interpreterCta = document.getElementById("menuInterpreterCta");
+  var interpreterCtaTextEl = document.getElementById("menuInterpreterCtaText");
+  var backButton = document.getElementById("menuBackButton");
+  var backButtonLabelEl = document.getElementById("menuBackLabel");
 
   var fallbackTimer = null;
-
-  if (placeNameEl) placeNameEl.textContent = PLACE_NAME;
-  if (promptEl) promptEl.textContent = MENU_IDLE_CLIP.caption;
+  var categoryLabelEls = []; // { cat, el } — 언어 전환 시 카테고리 라벨을 다시 채우기 위해
 
   function showFallback() {
     if (fallbackTimer) {
@@ -93,7 +95,7 @@
 
     var label = document.createElement("span");
     label.className = "category-label";
-    label.textContent = cat.label;
+    categoryLabelEls.push({ cat: cat, el: label });
 
     btn.appendChild(tile);
     btn.appendChild(label);
@@ -125,6 +127,23 @@
 
   interpreterCta.addEventListener("click", function () {
     Kiosk.connectTo107();
+  });
+
+  backButton.addEventListener("click", function () {
+    Kiosk.switchScreen("standby");
+  });
+
+  Kiosk.onLangChange(function (lang) {
+    var t = TEXT[lang];
+    var isEn = lang === "en";
+    placeNameEl.textContent = t.placeName;
+    placeSubEl.textContent = t.placeSub;
+    backButtonLabelEl.textContent = t.menuBack;
+    promptEl.textContent = isEn ? (MENU_IDLE_CLIP.en || MENU_IDLE_CLIP.caption) : MENU_IDLE_CLIP.caption;
+    interpreterCtaTextEl.textContent = t.menuInterpreterCta;
+    categoryLabelEls.forEach(function (entry) {
+      entry.el.textContent = isEn ? (entry.cat.labelEn || entry.cat.label) : entry.cat.label;
+    });
   });
 
   // ---------------------------------------------------------------------

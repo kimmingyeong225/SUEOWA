@@ -23,8 +23,18 @@
 
   <section class="content-pane">
     <header class="place-header">
-      <h1 class="place-name" id="placeName">태종대</h1>
-      <span class="place-sub">수어 안내</span>
+      <button type="button" class="back-button" id="menuBackButton">
+        <svg class="back-icon" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.4"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M15 6l-6 6l6 6" />
+        </svg>
+        <span id="menuBackLabel"></span>
+      </button>
+
+      <div class="place-title-group">
+        <h1 class="place-name" id="placeName"></h1>
+        <span class="place-sub" id="placeSubLabel"></span>
+      </div>
     </header>
 
     <div class="category-grid" id="categoryGrid"></div>
@@ -35,7 +45,7 @@
           <rect x="7" y="17" width="34" height="30" rx="6" stroke="#ffffff" stroke-width="4"/>
           <path d="M41 27 L56 19 V45 L41 37 Z" fill="#ffffff"/>
         </svg>
-        <span class="interpreter-cta-text">다른 질문이 있어요 · 수어통역 연결 107</span>
+        <span class="interpreter-cta-text" id="menuInterpreterCtaText"></span>
       </button>
 
       <button type="button" class="survey-menu-button" id="surveyMenuButton">

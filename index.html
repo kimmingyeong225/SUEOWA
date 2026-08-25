@@ -18,11 +18,13 @@
      페이지 이동은 여전히 없다 — 화면 전환은 .screen.is-active 토글로만 이뤄진다 -->
 <div id="app"></div>
 
-<!-- 화면 전체 터치 감지 레이어. 네 화면이 공유하며, 대기 화면일 때만
-     터치=메뉴 이동으로 동작(js에서 tap-layer--passive 토글) -->
+<!-- 화면 전체 터치 감지 레이어. 네 화면이 공유하며, 클릭은 항상 아래로 그대로
+     전달된다(pointer-events:none). 대기 화면에서 "아무 데나 터치 = 메뉴로
+     이동"은 common.js의 document 레벨 pointerdown 리스너가 처리한다 -->
 <div id="tapLayer" class="tap-layer"></div>
 
 <script src="assets/js/data.js"></script>
+<script src="assets/js/text.js"></script>
 <script src="assets/lib/qrcode.min.js"></script>
 <script src="assets/lib/supabase.js"></script>
 <script src="assets/js/common.js"></script>

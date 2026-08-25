@@ -6,7 +6,7 @@
            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M15 6l-6 6l6 6" />
       </svg>
-      <span>메뉴로 돌아가기</span>
+      <span id="contentBackLabel"></span>
     </button>
 
     <div class="player-title">
@@ -36,6 +36,14 @@
       <div id="contentLoading" class="player-loading" hidden aria-hidden="true">
         <span class="player-loading-dot"></span>
       </div>
+
+      <div class="player-video-vignette"></div>
+
+      <!-- 한국어/English 자막 공용 박스. 언어와 무관하게 위치·패딩·배경·폰트가
+           항상 똑같다 -->
+      <div class="player-caption-bar" id="playerCaptionBar">
+        <p class="player-caption" id="playerCaption"></p>
+      </div>
     </div>
   </div>
 
@@ -46,13 +54,19 @@
     </div>
   </div>
 
+  <!-- 자막 언어 토글: 대기 화면의 전역 토글과 Kiosk.lang을 공유한다 -->
+  <div class="lang-toggle player-lang-toggle" id="contentLangToggle" role="group" aria-label="자막 언어 선택">
+    <button type="button" class="lang-toggle-button is-active" id="contentLangKoButton" data-lang="ko">한국어</button>
+    <button type="button" class="lang-toggle-button" id="contentLangEnButton" data-lang="en">English</button>
+  </div>
+
   <div class="player-actions">
     <button type="button" class="nav-button" id="prevButton">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M15 6l-6 6l6 6" />
       </svg>
-      <span>이전</span>
+      <span id="prevButtonLabel"></span>
     </button>
 
     <button type="button" class="nav-button nav-button--replay" id="replayButton">
@@ -61,11 +75,11 @@
         <path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" />
         <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" />
       </svg>
-      <span>처음부터 다시 보기</span>
+      <span id="replayButtonLabel"></span>
     </button>
 
     <button type="button" class="nav-button nav-button--primary" id="nextButton">
-      <span>다음</span>
+      <span id="nextButtonLabel"></span>
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M9 6l6 6l-6 6" />

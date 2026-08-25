@@ -15,6 +15,28 @@
   Kiosk.screens = {};
   Kiosk.currentScreen = null;
 
+  // ---------------------------------------------------------------------
+  // 앱 전역 언어 상태 ("ko" | "en"). 화면을 넘나들어도 유지되고, 대기
+  // 화면이 다시 표시될 때(app.js) "ko"로 초기화된다. 각 화면 스크립트는
+  // Kiosk.onLangChange(fn)으로 리스너를 등록해 자기 화면의 문구를 채우고,
+  // 언어 토글 버튼은 Kiosk.applyLang(lang)을 호출해 전체를 갱신한다.
+  // ---------------------------------------------------------------------
+
+  Kiosk.lang = "ko";
+
+  var langListeners = [];
+
+  Kiosk.onLangChange = function (fn) {
+    langListeners.push(fn);
+    fn(Kiosk.lang); // 등록 즉시 현재 언어로 한 번 실행해 초기 문구를 채운다
+  };
+
+  Kiosk.applyLang = function (lang) {
+    if (!TEXT[lang]) return;
+    Kiosk.lang = lang;
+    langListeners.forEach(function (fn) { fn(lang); });
+  };
+
   // controller = { show: function(opts) {...} } — show는 화면이 보이기 시작할 때 호출됨
   Kiosk.registerScreen = function (name, controller) {
     Kiosk.screens[name] = controller;
@@ -36,14 +58,6 @@
       }
       var target = document.getElementById("screen-" + name);
       if (target) target.classList.add("is-active");
-
-      // 대기 화면(standby)에서는 화면 전체 터치 = 메뉴로 이동(터치 레이어가
-      // 클릭을 가로챔). 다른 화면에서는 터치 파장만 보여주고 클릭은
-      // 그대로 버튼에 전달돼야 하므로 tap-layer--passive를 토글한다
-      var tapLayer = document.getElementById("tapLayer");
-      if (tapLayer) {
-        tapLayer.classList.toggle("tap-layer--passive", name !== "standby");
-      }
 
       Kiosk.currentScreen = name;
       if (Kiosk.screens[name] && Kiosk.screens[name].show) {
@@ -88,6 +102,10 @@
     var isTransitioning = false;
 
     document.addEventListener("pointerdown", function (event) {
+      // 언어 토글처럼 대기 화면 위에 놓인 실제 버튼은 이 "아무 데나 터치"
+      // 제스처에서 제외한다 (터치 파장도, 메뉴 이동도 없이 버튼 자체가 처리)
+      if (event.target.closest && event.target.closest(".lang-toggle")) return;
+
       var point =
         event.changedTouches && event.changedTouches.length
           ? event.changedTouches[0]

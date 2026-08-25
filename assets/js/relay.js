@@ -7,6 +7,16 @@ const RELAY_URL = "https://107.relaycall.or.kr";
   var qrCodeEl = document.getElementById("qrCode");
   var qrFallbackEl = document.getElementById("qrFallback");
   var backButton = document.getElementById("relayBackButton");
+  var backButtonLabelEl = document.getElementById("relayBackLabel");
+  var instructionMainEl = document.getElementById("relayInstructionMain");
+  var instructionSubEl = document.getElementById("relayInstructionSub");
+
+  Kiosk.onLangChange(function (lang) {
+    var t = TEXT[lang];
+    instructionMainEl.textContent = t.relayQrPrompt;
+    instructionSubEl.textContent = t.relaySubtext;
+    backButtonLabelEl.textContent = t.relayBack;
+  });
 
   var qrBuilt = false;
 

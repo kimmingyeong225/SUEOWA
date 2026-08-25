@@ -17,15 +17,23 @@
   var videoA = document.getElementById("contentVideoA");
   var videoB = document.getElementById("contentVideoB");
   var fallback = document.getElementById("contentFallback");
+  var captionEl = document.getElementById("playerCaption");
+  var captionBarEl = document.getElementById("playerCaptionBar");
+  var langKoButton = document.getElementById("contentLangKoButton");
+  var langEnButton = document.getElementById("contentLangEnButton");
   var loadingEl = document.getElementById("contentLoading");
   var categoryLabelEl = document.getElementById("categoryLabel");
   var placeSubEl = document.getElementById("placeSub");
   var progressCountEl = document.getElementById("progressCount");
   var progressFillEl = document.getElementById("progressFill");
   var backButton = document.getElementById("contentBackButton");
+  var backButtonLabelEl = document.getElementById("contentBackLabel");
   var replayButton = document.getElementById("replayButton");
+  var replayButtonLabelEl = document.getElementById("replayButtonLabel");
   var prevButton = document.getElementById("prevButton");
+  var prevButtonLabelEl = document.getElementById("prevButtonLabel");
   var nextButton = document.getElementById("nextButton");
+  var nextButtonLabelEl = document.getElementById("nextButtonLabel");
   var surveyEntryBar = document.getElementById("surveyEntryBar");
   var surveyEntryButton = document.getElementById("surveyEntryButton");
 
@@ -47,6 +55,72 @@
     }
     return null;
   }
+
+  // ---------------------------------------------------------------------
+  // 자막/UI 언어. 상태는 Kiosk.lang(공용, common.js)에 저장돼 화면을
+  // 넘나들어도 유지되고, 대기 화면으로 돌아가면 app.js가 "ko"로 되돌린다.
+  // 이 화면의 토글 버튼은 Kiosk.applyLang()을 호출해 대기 화면 토글과
+  // 상태를 공유한다.
+  // ---------------------------------------------------------------------
+
+  // 한 줄에 맞을 때까지 글자 크기를 줄여보고(최소 70%까지), 그래도 안
+  // 맞으면 포기하고 CSS(white-space:normal + text-wrap:balance)가 알아서
+  // 보기 좋게 줄바꿈하도록 넘긴다
+  function fitCaptionToOneLine() {
+    captionEl.style.fontSize = "";
+    captionEl.style.whiteSpace = "nowrap";
+
+    var maxSize = parseFloat(getComputedStyle(captionEl).fontSize);
+    var minSize = maxSize * 0.7;
+    var availableWidth = captionBarEl.clientWidth -
+      parseFloat(getComputedStyle(captionBarEl).paddingLeft) -
+      parseFloat(getComputedStyle(captionBarEl).paddingRight);
+
+    var size = maxSize;
+    while (captionEl.scrollWidth > availableWidth && size > minSize) {
+      size -= 1;
+      captionEl.style.fontSize = size + "px";
+    }
+
+    if (captionEl.scrollWidth > availableWidth) {
+      // 최소 크기로도 한 줄에 못 들어감 — 줄바꿈을 허용한다
+      captionEl.style.whiteSpace = "normal";
+    }
+  }
+
+  function renderCaption() {
+    if (!captionEl || playlist.length === 0) return;
+    var clip = playlist[current];
+    var isEn = Kiosk.lang === "en";
+
+    captionEl.textContent = isEn ? (clip.en || clip.caption || "") : (clip.caption || "");
+    fitCaptionToOneLine();
+  }
+
+  // 카테고리에 들어와 있을 때만 의미 있는 부분(카테고리명·장소 서브텍스트).
+  // show()와 언어 변경 리스너 양쪽에서 부른다
+  function applyCategoryText(lang) {
+    if (!category) return;
+    var t = TEXT[lang];
+    var isEn = lang === "en";
+    categoryLabelEl.textContent = isEn ? (category.labelEn || category.label) : category.label;
+    placeSubEl.textContent = t.placeName + " " + t.placeSub;
+  }
+
+  langKoButton.addEventListener("click", function () { Kiosk.applyLang("ko"); });
+  langEnButton.addEventListener("click", function () { Kiosk.applyLang("en"); });
+
+  Kiosk.onLangChange(function (lang) {
+    var t = TEXT[lang];
+    langKoButton.classList.toggle("is-active", lang === "ko");
+    langEnButton.classList.toggle("is-active", lang === "en");
+    backButtonLabelEl.textContent = t.contentBack;
+    prevButtonLabelEl.textContent = t.contentPrev;
+    nextButtonLabelEl.textContent = t.contentNext;
+    replayButtonLabelEl.textContent = t.contentReplay;
+    applyCategoryText(lang);
+    renderCaption();
+  });
 
   // ---------------------------------------------------------------------
   // 로딩 표시: 0.3초 안에 재생이 시작되면 아예 보여주지 않는다.
@@ -140,6 +214,7 @@
   function playActive() {
     updateProgress();
     scheduleLoading();
+    renderCaption();
     console.log(
       "[content] playing clip " + (current + 1) + "/" + playlist.length + ": " + activeEl.src
     );
@@ -218,6 +293,7 @@
       "[content] error loading clip " + (current + 1) + "/" + playlist.length + ": " +
       activeEl.src + " — code " + code + " (" + name + ")"
     );
+    hideLoading(); // "playing" 이벤트가 안 오므로 여기서도 로딩 표시를 꺼줘야 한다
     advance();
   }
 
@@ -287,8 +363,7 @@
       category.clips.map(function (c) { return c.file; }).join(", ")
     );
 
-    categoryLabelEl.textContent = category.label;
-    placeSubEl.textContent = PLACE_NAME + " 수어 안내";
+    applyCategoryText(Kiosk.lang);
 
     playlist = category.clips;
     current = 0;

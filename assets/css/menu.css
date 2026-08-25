@@ -19,7 +19,7 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  /* button_select2.mp4는 1920x1080 가로 영상이라, 세로로 좁고 긴 이 영역에
+  /* button_select_3.mp4는 1920x1080 가로 영상이라, 세로로 좁고 긴 이 영역에
      contain을 쓰면 인물이 작게 보인다. cover로 세로를 꽉 채우고 좌우를 크롭해
      인물이 크게 보이게 한다 */
   object-fit: cover;
@@ -50,7 +50,7 @@
   font-size: 14px;
 }
 
-/* button_select2.mp4에는 자막이 없어서 여기만 웹앱에서 직접 자막을 띄운다 */
+/* button_select_3.mp4에는 자막이 없어서 웹앱에서 직접 자막을 띄운다 */
 .menu-prompt-bar {
   position: absolute;
   left: 0;
@@ -107,9 +107,15 @@
 .place-header {
   flex: none;
   display: flex;
+  align-items: center;
+  gap: clamp(10px, 2vw, 16px);
+  margin-bottom: clamp(10px, 2.25vh, 18px);
+}
+
+.place-title-group {
+  display: flex;
   align-items: baseline;
   gap: 10px;
-  margin-bottom: clamp(10px, 2.25vh, 18px);
 }
 
 .place-name {
@@ -270,8 +276,6 @@
   font-weight: 600;
   color: var(--color-fg);
 }
-
-/* .tap-layer--passive 는 모든 화면에서 공유하므로 style.css로 옮김 */
 
 /* ---------- 우측 상단: 관리자 화면 진입용 숨김 탭 영역 (5회 연속 탭) ---------- */
 

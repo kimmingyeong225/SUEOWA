@@ -6,6 +6,11 @@
   var videoA = document.getElementById("introVideoA");
   var videoB = document.getElementById("introVideoB");
   var fallback = document.getElementById("videoFallback");
+  var captionEl = document.getElementById("introCaption");
+  var ctaTextEl = document.getElementById("ctaText");
+  var ctaSubtextEl = document.getElementById("ctaSubtext");
+  var langKoButton = document.getElementById("standbyLangKoButton");
+  var langEnButton = document.getElementById("standbyLangEnButton");
 
   var playlist = [];
   var current = 0;
@@ -41,7 +46,15 @@
     standbyEl.load();
   }
 
+  function renderIntroCaption() {
+    if (!captionEl || playlist.length === 0) return;
+    var clip = playlist[current];
+    var isEn = Kiosk.lang === "en";
+    captionEl.textContent = isEn ? (clip.en || clip.caption || "") : (clip.caption || "");
+  }
+
   function playCurrent() {
+    renderIntroCaption();
     activeEl.currentTime = 0;
     var playPromise = activeEl.play();
     if (playPromise && playPromise.catch) {
@@ -78,6 +91,18 @@
   videoA.addEventListener("error", onClipError);
   videoB.addEventListener("error", onClipError);
 
+  langKoButton.addEventListener("click", function () { Kiosk.applyLang("ko"); });
+  langEnButton.addEventListener("click", function () { Kiosk.applyLang("en"); });
+
+  Kiosk.onLangChange(function (lang) {
+    var t = TEXT[lang];
+    ctaTextEl.textContent = t.standbyTouch;
+    ctaSubtextEl.textContent = t.standbySignGuide;
+    langKoButton.classList.toggle("is-active", lang === "ko");
+    langEnButton.classList.toggle("is-active", lang === "en");
+    renderIntroCaption();
+  });
+
   function start() {
     hideFallback();
     current = 0;
@@ -94,6 +119,7 @@
     videoA.pause();
     videoB.pause();
     started = true;
+    Kiosk.applyLang("ko");
 
     var urls = ATTRACT_CLIPS.map(urlFor);
     Kiosk.probeClips(urls, function (results) {

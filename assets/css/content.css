@@ -23,33 +23,10 @@
   gap: clamp(10px, 2vw, 20px);
 }
 
-.back-button {
+/* .back-button / .back-icon 자체는 menu.html에서도 함께 쓰므로 style.css로 옮김.
+   grid 안에서의 위치(좌측 정렬)만 여기서 잡는다 */
+.player-topbar .back-button {
   justify-self: start;
-  flex: none;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 100px;
-  padding: clamp(8px, 1.5vh, 12px) clamp(14px, 2vw, 20px) clamp(8px, 1.5vh, 12px) clamp(10px, 1.5vw, 14px);
-  font-family: inherit;
-  font-size: clamp(13px, 1.8vh, 16px);
-  font-weight: 600;
-  color: var(--color-fg);
-  cursor: pointer;
-  transition: transform 0.15s ease, background-color 0.15s ease;
-}
-
-.back-button:active {
-  transform: scale(0.96);
-  background: rgba(255, 255, 255, 0.11);
-}
-
-.back-icon {
-  width: clamp(16px, 2.2vh, 20px);
-  height: clamp(16px, 2.2vh, 20px);
-  flex: none;
 }
 
 .player-title {
@@ -141,6 +118,64 @@
 .player-video-card .status-badge {
   top: 20px;
   left: 20px;
+}
+
+/* 영상 아래쪽 가장자리를 검정 배경과 자연스럽게 잇는 비네트 (자막 배경용) */
+.player-video-vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 70%,
+    rgba(0, 0, 0, 0.6) 100%
+  );
+}
+
+/* 카테고리 클립도 자막이 영상에 찍혀 있지 않아, 웹앱에서 직접 자막을 띄운다.
+   한국어/English가 정확히 같은 박스(위치·패딩·배경)를 공유해서, 언어를
+   바꿔도 영상 크기·아바타 위치·자막 스타일이 절대 달라지지 않는다 */
+.player-caption-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 4;
+  padding: clamp(16px, 4vh, 32px) var(--space-lg) var(--space-md);
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.player-caption {
+  margin: 0;
+  /* flex item은 기본 min-width:auto라 white-space:nowrap으로 재는 동안
+     내용 너비가 max-width를 무시하고 밀고 나갈 수 있다 — min-width:0으로
+     막아야 content.js의 한 줄 맞추기 로직이 실제 가용 폭을 정확히 잰다 */
+  min-width: 0;
+  max-width: 100%;
+  font-size: clamp(16px, 2.8vh, 34px);
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--color-fg);
+  text-align: center;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+  /* content.js가 한 줄에 맞도록 글자 크기를 먼저 줄여보고, 그래도 안
+     맞으면 여기서 자연스럽게 줄바꿈한다. text-wrap:balance는 그 경우
+     줄 길이가 한쪽으로 쏠리지 않고 고르게 나뉘도록 도와준다
+     (미지원 브라우저에서는 조용히 무시되고 기본 줄바꿈으로 동작) */
+  white-space: normal;
+  text-wrap: balance;
+}
+
+/* ---------- 자막 언어 토글: content.html에서는 하단 버튼 영역 중앙에 놓는다
+   (세그먼트 버튼 자체 스타일은 style.css의 .lang-toggle 공용 규칙) ---------- */
+
+.player-lang-toggle {
+  flex: none;
+  align-self: center;
 }
 
 /* ---------- 로딩 표시: 0.3초 넘게 걸릴 때만 부드럽게 나타남 (깜빡임 없음) ---------- */

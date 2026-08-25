@@ -133,11 +133,15 @@ img, video {
   inset: 0;
   width: 100%;
   height: 100%;
-  /* cover + object-position으로 왼쪽을 강조하면 자막(영상에 포함)이 잘리는
-     클립이 있어(아래 참고) contain을 유지한다. 대신 영역 폭이 58%→64%로
-     넓어진 만큼 자연히 더 크게 보인다 */
+  /* 영상(1920x1080, 16:9)이 세로로 좁고 긴 이 영역(약 1.16:1)보다 훨씬
+     넓어서, cover로 꽉 채우면 좌우가 35% 가까이 잘려 지나치게 확대돼
+     답답해 보인다. 그래서 contain으로 전체 프레임을 다 보여주되,
+     transform으로 살짝만 확대해(카드 밖으로 넘치는 부분은 overflow:hidden으로
+     잘림) 자막이 있던 예전보다는 크면서도 과하게 꽉 차 보이지 않게 한다 */
   object-fit: contain;
   object-position: center center;
+  transform: scale(1.25);
+  transform-origin: center center;
   background: var(--color-bg);
   pointer-events: none;
   /* welcome → intro → touch 전환 시 두 영상이 겹쳐 있다가 자리를 바꾸며 크로스페이드됨 */
@@ -168,6 +172,41 @@ img, video {
 
 .video-fallback[hidden] {
   display: none;
+}
+
+/* 영상 아래쪽 가장자리를 검정 배경과 자연스럽게 잇는 비네트 (자막 배경용) */
+.intro-video-vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 70%,
+    rgba(0, 0, 0, 0.6) 100%
+  );
+}
+
+/* 자막이 더 이상 영상에 찍혀 있지 않아, 웹앱에서 직접 자막을 띄운다 */
+.intro-caption-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  padding: clamp(20px, 5vh, 40px) var(--space-lg) var(--space-lg);
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.intro-caption {
+  margin: 0;
+  font-size: clamp(18px, 3.1vh, 40px);
+  font-weight: 600;
+  color: var(--color-fg);
+  text-align: center;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.85);
 }
 
 .fallback-logo {
@@ -350,6 +389,73 @@ img, video {
   text-align: center;
 }
 
+/* ---------- 뒤로가기 버튼 — 콘텐츠 재생 화면·메뉴 화면에서 공용으로 쓴다 ---------- */
+
+.back-button {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 100px;
+  padding: clamp(8px, 1.5vh, 12px) clamp(14px, 2vw, 20px) clamp(8px, 1.5vh, 12px) clamp(10px, 1.5vw, 14px);
+  font-family: inherit;
+  font-size: clamp(13px, 1.8vh, 16px);
+  font-weight: 600;
+  color: var(--color-fg);
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.back-button:active {
+  transform: scale(0.96);
+  background: rgba(255, 255, 255, 0.11);
+}
+
+.back-icon {
+  width: clamp(16px, 2.2vh, 20px);
+  height: clamp(16px, 2.2vh, 20px);
+  flex: none;
+}
+
+/* ---------- 언어 토글 (한국어/English) — 대기 화면 우측 하단, 콘텐츠
+   재생 화면 하단 버튼 영역에서 공용으로 쓰는 세그먼트 버튼 스타일 ---------- */
+
+.lang-toggle {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 100px;
+  background: #15171c;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+}
+
+.lang-toggle-button {
+  border: none;
+  border-radius: 100px;
+  padding: clamp(8px, 1.4vh, 11px) clamp(18px, 2.8vw, 28px);
+  font-family: inherit;
+  font-size: clamp(13px, 1.8vh, 16px);
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.55);
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.lang-toggle-button.is-active {
+  background: linear-gradient(180deg, #3182f0, #1f5fcc);
+  color: var(--color-fg);
+}
+
+.standby-lang-toggle {
+  position: absolute;
+  right: var(--space-lg);
+  bottom: var(--space-lg);
+  z-index: 6;
+}
+
 /* ---------- 텍스트 공통 그림자 (네온/글로우 금지, 은은한 그림자만) ---------- */
 
 .cta-text,
@@ -367,11 +473,10 @@ img, video {
   inset: 0;
   z-index: 50;
   touch-action: none;
-}
-
-/* 버튼이 있는 화면(menu.html, content.html)에서는 터치 파장만 보여주고
-   클릭은 그대로 아래 버튼으로 전달되게 한다 */
-.tap-layer--passive {
+  /* 항상 클릭을 가로채지 않고 그대로 아래(버튼 등)로 전달한다. 대기 화면의
+     "아무 데나 터치 = 메뉴로 이동"은 common.js의 document 레벨 pointerdown
+     리스너가 처리하므로, 레이어 자체가 클릭을 가로챌 필요가 없다 — 가로채면
+     대기 화면 위에 놓인 실제 버튼(언어 토글 등)이 눌리지 않는다 */
   pointer-events: none;
 }
 
