@@ -14,10 +14,16 @@
       <span class="player-place" id="placeSub"></span>
     </div>
 
-    <!-- <div class="status-badge status-badge--inline">
-      <span class="status-dot"></span>
-      <span class="status-label">수어 안내 중</span>
-    </div> -->
+    <!-- 마지막 클립까지 다 본 뒤에만 나타나는 평가 진입 버튼. 상단 바
+         우측(뒤로가기와 대칭되는 자리)에 둬서, 나타나도 아래 레이아웃이
+         밀리지 않는다 -->
+    <button type="button" class="survey-entry-button" id="surveyEntryButton" hidden>
+      <svg class="survey-entry-icon" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873l-6.158 -3.245" />
+      </svg>
+      <span>평가하기</span>
+    </button>
   </header>
 
   <div class="player-video-wrap">
@@ -84,17 +90,6 @@
            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M9 6l6 6l-6 6" />
       </svg>
-    </button>
-  </div>
-
-  <!-- 마지막 클립까지 다 본 뒤에만 나타나는 평가 진입 버튼 -->
-  <div class="survey-entry-bar" id="surveyEntryBar" hidden>
-    <button type="button" class="survey-entry-button" id="surveyEntryButton">
-      <svg class="survey-entry-icon" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2"
-           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873l-6.158 -3.245" />
-      </svg>
-      <span>평가하기</span>
     </button>
   </div>
 

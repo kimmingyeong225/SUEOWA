@@ -34,7 +34,6 @@
   var prevButtonLabelEl = document.getElementById("prevButtonLabel");
   var nextButton = document.getElementById("nextButton");
   var nextButtonLabelEl = document.getElementById("nextButtonLabel");
-  var surveyEntryBar = document.getElementById("surveyEntryBar");
   var surveyEntryButton = document.getElementById("surveyEntryButton");
 
   var category = null;
@@ -184,11 +183,11 @@
   // ---------------------------------------------------------------------
 
   function showSurveyEntry() {
-    surveyEntryBar.hidden = false;
+    surveyEntryButton.hidden = false;
   }
 
   function hideSurveyEntry() {
-    surveyEntryBar.hidden = true;
+    surveyEntryButton.hidden = true;
   }
 
   // ---------------------------------------------------------------------

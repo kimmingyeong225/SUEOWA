@@ -86,6 +86,17 @@ http
       fs.createReadStream(filePath).pipe(res);
     });
   })
-  .listen(PORT, function () {
-    console.log("수어와 키오스크 서버 실행 중: http://localhost:" + PORT + "/index.html");
+  .listen(PORT, "0.0.0.0", function () {
+    var nets = require("os").networkInterfaces();
+    var lanIPs = [];
+    for (var name in nets) {
+      nets[name].forEach(function (net) {
+        if (net.family === "IPv4" && !net.internal) lanIPs.push(net.address);
+      });
+    }
+    console.log("수어와 키오스크 서버 실행 중:");
+    console.log("  로컬:  http://localhost:" + PORT + "/index.html");
+    lanIPs.forEach(function (ip) {
+      console.log("  네트워크: http://" + ip + ":" + PORT + "/index.html");
+    });
   });
