@@ -55,7 +55,6 @@ var CATEGORIES = [
     clips: [
       { file: "notice_intro_3.mp4", caption: "관람에 앞서, 안전을 위해 꼭 알아야 할 내용을 안내해 드립니다.", en: "Before you start your visit, here are a few things you need to know for your safety." },
       { file: "closed_1_3.mp4", caption: "신선바위와 망부석은 돌이 떨어질 위험이 있어, 지금은 들어갈 수 없습니다.", en: "Sinseon Rock and Mangbuseok are closed right now because of the risk of falling rocks." },
-      { file: "closed_2.mp4", caption: "등대 아래 자갈밭은 저녁 8시부터 들어갈 수 없습니다.", en: "The pebble beach below the lighthouse is closed after 8 p.m." },
       { file: "closed_3_3.mp4", caption: "전망대는 공사 때문에 막힐 수 있으니, 가기 전에 안내소에 물어보세요.", en: "The observatory may be closed off for construction, so please check at the information desk before you head there." }
     ]
   },
@@ -66,8 +65,7 @@ var CATEGORIES = [
     icon: "clock-hour-4",
     color: "#9FE1CB",
     clips: [
-      { file: "info_open_3.mp4", caption: "태종대는 아침 4시부터 밤 12시까지 들어올 수 있습니다.", en: "Taejongdae is open from 4 a.m. until midnight." },
-      { file: "info_drink.mp4", caption: "공원 안에서는 음료수를 살 수 없습니다. 정문 편의점에서 미리 사 오세요.", en: "There is nowhere to buy drinks inside the park. Please buy them ahead of time at the convenience store by the main gate." }
+      { file: "info_open_3.mp4", caption: "태종대는 아침 4시부터 밤 12시까지 들어올 수 있습니다.", en: "Taejongdae is open from 4 a.m. until midnight." }
     ]
   }
 ];
